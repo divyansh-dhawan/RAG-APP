@@ -1,0 +1,8 @@
+google-generativeai
+qdrant-client
+cohere
+streamlit
+python-dotenv
+langchain
+langchain-google-genai
+langchain-community
