@@ -10,7 +10,7 @@ This project is a simple RAG (Retrieval-Augmented Generation) chatbot that uses 
 4.  **Vector Store**: The embeddings are stored in a Qdrant Cloud collection.
 5.  **Retrieval**: When a user asks a question, the application retrieves the most relevant documents from Qdrant.
 6.  **Reranking**: The retrieved documents are reranked using Cohere's Rerank API to improve relevance.
-7.  **Answering**: The reranked documents and the user's question are passed to the Gemini Pro model to generate a final answer.
+7.  **Answering**: The reranked documents and the user's question are passed to the Gemini 1.5 Flash model to generate a final answer.
 8.  **Citations**: The answer is presented with citations to the source documents.
 
 ## Chunking Parameters
@@ -30,7 +30,7 @@ This project is a simple RAG (Retrieval-Augmented Generation) chatbot that uses 
 
 *   **Vector Database**: [Qdrant Cloud](https://qdrant.tech/cloud/)
 *   **Embedding Model**: [Google Gemini](https://ai.google.dev/) (`models/embedding-001`)
-*   **LLM**: [Google Gemini Pro](https://ai.google.dev/)
+*   **LLM**: [Google Gemini 1.5 Flash](https://ai.google.dev/)
 *   **Reranker**: [Cohere](https://cohere.com/)
 
 ## Quick Start
