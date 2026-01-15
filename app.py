@@ -186,7 +186,7 @@ def generate_answer(query, context):
 # ==============================================================================
 # UI INTERFACE
 # ==============================================================================
-st.markdown('<div class="main-header">RAG Chatbot Enterprise</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">RAG Chatbot</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # Sidebar

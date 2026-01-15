@@ -1,5 +1,7 @@
 # RAG Chatbot with Qdrant, Gemini, and Cohere
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://rag-app-ohyrmcnjhvjr7axbshypvk.streamlit.app/)
+
 This project is a robust RAG (Retrieval-Augmented Generation) chatbot that uses Qdrant as a vector database, Gemini for embeddings and language model, and Cohere for reranking. Built with Streamlit for a clean UI.
 
 ## Features
