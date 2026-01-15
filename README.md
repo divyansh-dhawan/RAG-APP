@@ -1,67 +1,52 @@
 # RAG Chatbot with Qdrant, Gemini, and Cohere
 
-This project is a simple RAG (Retrieval-Augmented Generation) chatbot that uses Qdrant as a vector database, Gemini for embeddings and language model, and Cohere for reranking. The application is built with Streamlit.
+This project is a robust RAG (Retrieval-Augmented Generation) chatbot that uses Qdrant as a vector database, Gemini for embeddings and language model, and Cohere for reranking. Built with Streamlit for a clean UI.
+
+## Features
+
+*   **Smart Rate Limiting**: Automatically handles Google API's `429 Resource Exhausted` errors by parsing dynamic retry times.
+*   **Model Fallback Strategy**: "Self-healing" generation that rotates between `gemini-2.5-flash`, `gemini-2.5-flash-lite`, and `gemini-3-flash-preview` to maximise uptime.
+*   **Modern Stack**: Uses `langchain-qdrant` for Qdrant connectivity and `gemini-2.5/3.0` models.
 
 ## Architecture
 
-1.  **Data Ingestion**: Users can upload a text file or paste text into a text area.
-2.  **Chunking**: The input text is split into smaller chunks.
-3.  **Embedding**: The text chunks are converted into vector embeddings using Google's Gemini model.
-4.  **Vector Store**: The embeddings are stored in a Qdrant Cloud collection.
-5.  **Retrieval**: When a user asks a question, the application retrieves the most relevant documents from Qdrant.
-6.  **Reranking**: The retrieved documents are reranked using Cohere's Rerank API to improve relevance.
-7.  **Answering**: The reranked documents and the user's question are passed to the Gemini 1.5 Flash model to generate a final answer.
-8.  **Citations**: The answer is presented with citations to the source documents.
-
-## Chunking Parameters
-
-*   **Chunk Size**: 1000 tokens
-*   **Chunk Overlap**: 100 tokens (10%)
-
-## Retriever and Reranker Settings
-
-*   **Retriever**:
-    *   **Top-k**: 5
-*   **Reranker**:
-    *   **Model**: `rerank-english-v2.0`
-    *   **Top-n**: 3
-
-## Providers Used
-
-*   **Vector Database**: [Qdrant Cloud](https://qdrant.tech/cloud/)
-*   **Embedding Model**: [Google Gemini](https://ai.google.dev/) (`models/embedding-001`)
-*   **LLM**: [Google Gemini 1.5 Flash](https://ai.google.dev/)
-*   **Reranker**: [Cohere](https://cohere.com/)
+1.  **Data Ingestion**: Upload text files or paste content.
+2.  **Chunking**: RecursiveCharacterTextSplitter (Size: 1000, Overlap: 100).
+3.  **Embedding**: `models/text-embedding-004` (Google Gemini).
+4.  **Vector Store**: Qdrant Cloud (via `langchain-qdrant`).
+5.  **Reranking**: Cohere `rerank-english-v3.0`.
+6.  **Answering**: Gemini 2.5/3.0 generation with source citations.
 
 ## Quick Start
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/divyansh-dhawan/RAG-APP.git
+    cd rag-app
     ```
 
-2.  **Install the dependencies:**
+2.  **Install dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  **Set up your environment variables:**
-    Create a `.env` file in the root of the project and add your API keys:
-    ```
-    GOOGLE_API_KEY="YOUR_GOOGLE_API_KEY"
-    COHERE_API_KEY="YOUR_COHERE_API_KEY"
-    QDRANT_API_KEY="YOUR_QDRANT_API_KEY"
-    QDRANT_URL="YOUR_QDRANT_URL"
+3.  **Configure Secrets:**
+    The app uses Streamlit secrets. Create a file at `.streamlit/secrets.toml`:
+    ```toml
+    GOOGLE_API_KEY = "your-google-key"
+    COHERE_API_KEY = "your-cohere-key"
+    QDRANT_API_KEY = "your-qdrant-key"
+    QDRANT_URL = "your-qdrant-url"
     ```
 
-4.  **Run the Streamlit app:**
+4.  **Run the App:**
     ```bash
     streamlit run app.py
     ```
 
-## Remarks
+## Providers
 
-*   The cost estimation in the app is a rough estimate based on the number of tokens. For accurate pricing, please refer to the official pricing pages of the respective providers.
-*   The current implementation uses a simple chunking strategy. For more complex documents, more advanced chunking strategies might be needed.
-*   The application is designed for demonstration purposes and may have limitations in a production environment.
+*   **Vector Database**: [Qdrant Cloud](https://qdrant.tech/cloud/)
+*   **Embeddings**: Google Gemini `text-embedding-004`
+*   **LLM**: Google Gemini `2.5-flash` / `3-flash-preview`
+*   **Reranker**: Cohere `rerank-english-v3.0`

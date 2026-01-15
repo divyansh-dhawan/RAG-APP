@@ -1,0 +1,187 @@
+/* Enterprise Clean Theme */
+
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Base Variables */
+:root {
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --border-color: rgba(128, 128, 128, 0.2);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Global Styles */
+html,
+body,
+[class*="css"] {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Headers */
+h1,
+h2,
+h3,
+.main-header {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: inherit;
+    /* Inherit from theme (Light/Dark compat) */
+}
+
+.main-header {
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Streamlit Sidebar */
+[data-testid="stSidebar"][aria-expanded="true"] {
+    background-color: #d1d5db;
+    /* Darker Gray */
+    border-right: 1px solid var(--border-color);
+    width: 33vw !important;
+    min-width: 33vw !important;
+    max-width: 33vw !important;
+}
+
+/* Ensure background color persists even during animation/collapsed state if needed, 
+   but width should strictly be auto when collapsed to release space. */
+[data-testid="stSidebar"] {
+    background-color: #d1d5db;
+    border-right: 1px solid var(--border-color);
+}
+
+/* Hide Sidebar Resize Handle */
+div[data-testid="stSidebarUserContent"]+div {
+    display: none !important;
+}
+
+/* Dark Mode Sidebar Override - Force Gray */
+@media (prefers-color-scheme: dark) {
+    [data-testid="stSidebar"] {
+        background-color: #d1d5db;
+        /* Darker Gray */
+    }
+
+    /* Force dark text on the gray sidebar for readability in dark mode */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] svg {
+        color: #222222 !important;
+        fill: #222222 !important;
+    }
+
+    /* Ensure inputs in sidebar have dark text/background context */
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stTextArea textarea,
+    [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+        color: #222222 !important;
+        background-color: #ffffff !important;
+        border-color: #cccccc !important;
+    }
+
+    /* Fix Button Readability in Sidebar */
+    [data-testid="stSidebar"] .stButton button {
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        border: 1px solid #cccccc !important;
+    }
+
+    [data-testid="stSidebar"] .stButton button:hover {
+        background-color: #e6e6e6 !important;
+        border-color: #b3b3b3 !important;
+    }
+
+    /* Fix File Uploader Readability in Sidebar */
+    [data-testid="stSidebar"] [data-testid="stFileUploader"] {
+        background-color: #ffffff !important;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stFileUploader"] section {
+        background-color: #f8f9fa !important;
+        color: #222222 !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stFileUploader"] button {
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        border: 1px solid #cccccc !important;
+    }
+}
+
+/* Buttons */
+.stButton button {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    box-shadow: none;
+}
+
+.stButton button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Primary Action Buttons */
+.stButton button[kind="primary"] {
+    font-weight: 600;
+}
+
+/* Inputs */
+.stTextInput input,
+.stTextArea textarea {
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.stTextInput input:focus,
+.stTextArea textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: none;
+}
+
+/* Chat Messages */
+.stChatMessage {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-weight: 500;
+    padding-bottom: 12px;
+}
+
+/* Metric Cards */
+[data-testid="stMetricValue"] {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    font-weight: 500;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: transparent;
+}
