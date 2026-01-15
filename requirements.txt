@@ -6,3 +6,5 @@ python-dotenv
 langchain
 langchain-google-genai
 langchain-community
+langchain-qdrant
+langchain-text-splitters
