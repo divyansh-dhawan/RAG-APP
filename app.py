@@ -1,4 +1,10 @@
 import streamlit as st
+import langchain_google_genai
+import google.generativeai as genai
+
+st.write("langchain_google_genai:", langchain_google_genai.__version__)
+st.write("google-generativeai:", genai.__version__)
+'''
 import time
 import re
 import cohere
@@ -238,3 +244,4 @@ if query := st.chat_input("Ask a question..."):
             st.markdown(full_resp)
             
     st.session_state.messages.append({"role": "assistant", "content": full_resp})
+'''
