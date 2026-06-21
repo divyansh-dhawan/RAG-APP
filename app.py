@@ -1,35 +1,4 @@
 import streamlit as st
-import langchain_google_genai
-import google.generativeai as genai
-from dotenv import load_dotenv
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-
-load_dotenv()
-try:
-    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-    COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
-    QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"]
-    QDRANT_URL = st.secrets["QDRANT_URL"]
-except Exception as e:
-    st.error(f"Missing API Keys: {e}")
-    st.stop()
-
-genai.configure(api_key=GOOGLE_API_KEY)
-
-try:
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        google_api_key=GOOGLE_API_KEY
-    )
-
-    vec = embeddings.embed_query("hello world")
-
-    st.success("Embedding works!")
-    st.write("Dimension:", len(vec))
-
-except Exception as e:
-    st.exception(e)
-'''
 import time
 import re
 import cohere
@@ -88,8 +57,11 @@ def process_and_chunk_data(text_data, chunk_size=1000, chunk_overlap=100):
 # ==============================================================================
 def get_qdrant_vector_store(collection_name="user-data-collection"):
     client = qdrant_client.QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=30)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-001", google_api_key=GOOGLE_API_KEY)
-
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=GOOGLE_API_KEY
+    )
+    
     try:
         client.get_collection(collection_name=collection_name)
     except Exception:
@@ -97,7 +69,7 @@ def get_qdrant_vector_store(collection_name="user-data-collection"):
             client.create_collection(
                 collection_name=collection_name,
                 vectors_config=qdrant_client.http.models.VectorParams(
-                    size=768, 
+                    size=3072, 
                     distance=qdrant_client.http.models.Distance.COSINE
                 )
             )
@@ -191,7 +163,7 @@ def generate_answer(query, context):
     
     for model_name in candidate_models:
         try:
-            model = ChatGoogleGenerativeAI(model=model_name, temperature=0.3, api_key=GOOGLE_API_KEY)
+            model = ChatGoogleGenerativeAI(model=model_name, temperature=0.3, google_api_key=GOOGLE_API_KEY)
             chain = PromptTemplate(template=prompt_template, input_variables=["context", "question"]) | model
             
             # Robust Retry Loop
@@ -269,4 +241,3 @@ if query := st.chat_input("Ask a question..."):
             st.markdown(full_resp)
             
     st.session_state.messages.append({"role": "assistant", "content": full_resp})
-'''
