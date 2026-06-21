@@ -2,8 +2,37 @@ import streamlit as st
 import langchain_google_genai
 import google.generativeai as genai
 
-st.write("langchain_google_genai:", langchain_google_genai.__version__)
 st.write("google-generativeai:", genai.__version__)
+
+import importlib.metadata
+
+st.write(
+    "langchain-google-genai:",
+    importlib.metadata.version("langchain-google-genai")
+)
+
+st.write(
+    "google-generativeai:",
+    importlib.metadata.version("google-generativeai")
+)
+
+st.write(
+    "langchain:",
+    importlib.metadata.version("langchain")
+)
+
+genai.configure(api_key=GOOGLE_API_KEY)
+
+try:
+    models = list(genai.list_models())
+
+    st.write("Models found:", len(models))
+
+    for m in models:
+        st.write(m.name)
+
+except Exception as e:
+    st.exception(e)
 '''
 import time
 import re
