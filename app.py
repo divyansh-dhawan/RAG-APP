@@ -1,25 +1,7 @@
 import streamlit as st
 import langchain_google_genai
 import google.generativeai as genai
-
-st.write("google-generativeai:", genai.__version__)
-
-import importlib.metadata
-
-st.write(
-    "langchain-google-genai:",
-    importlib.metadata.version("langchain-google-genai")
-)
-
-st.write(
-    "google-generativeai:",
-    importlib.metadata.version("google-generativeai")
-)
-
-st.write(
-    "langchain:",
-    importlib.metadata.version("langchain")
-)
+from dotenv import load_dotenv
 
 load_dotenv()
 try:
