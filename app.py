@@ -57,7 +57,7 @@ def process_and_chunk_data(text_data, chunk_size=1000, chunk_overlap=100):
 # ==============================================================================
 def get_qdrant_vector_store(collection_name="user-data-collection"):
     client = qdrant_client.QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=30)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GOOGLE_API_KEY)
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-001", google_api_key=GOOGLE_API_KEY)
 
     try:
         client.get_collection(collection_name=collection_name)
