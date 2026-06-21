@@ -2,6 +2,7 @@ import streamlit as st
 import langchain_google_genai
 import google.generativeai as genai
 from dotenv import load_dotenv
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 load_dotenv()
 try:
@@ -16,12 +17,15 @@ except Exception as e:
 genai.configure(api_key=GOOGLE_API_KEY)
 
 try:
-    models = list(genai.list_models())
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=GOOGLE_API_KEY
+    )
 
-    st.write("Models found:", len(models))
+    vec = embeddings.embed_query("hello world")
 
-    for m in models:
-        st.write(m.name)
+    st.success("Embedding works!")
+    st.write("Dimension:", len(vec))
 
 except Exception as e:
     st.exception(e)
