@@ -9,6 +9,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pypdf import PdfReader 
 
 # ==============================================================================
 # CONFIGURATION & SETUP
@@ -38,10 +39,31 @@ except Exception as e:
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # ==============================================================================
-# STEP 1: DATA INGESTION (Processing & Chunking)
+# HELPER FUNCTIONS FOR FILE PROCESSING
 # ==============================================================================
-# In this step, we take the raw text and break it down into smaller, manageable
-# pieces ("chunks") so they can be embedded and stored efficiently.
+
+def extract_text_from_file(uploaded_file):
+    """
+    Identifies the file type and extracts text accordingly.
+    Supports .txt and .pdf
+    """
+    if uploaded_file.name.endswith(".txt"):
+        # Handle Text File
+        return uploaded_file.read().decode("utf-8")
+    
+    elif uploaded_file.name.endswith(".pdf"):
+        # Handle PDF File
+        pdf_reader = PdfReader(uploaded_file)
+        text = ""
+        for page in pdf_reader.pages:
+            content = page.extract_text()
+            if content:
+                text += content + "\n"
+        return text
+    return None
+
+# ==============================================================================
+# STEP 1: DATA INGESTION (Processing & Chunking)
 # ==============================================================================
 def process_and_chunk_data(text_data, chunk_size=1000, chunk_overlap=100):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -52,13 +74,13 @@ def process_and_chunk_data(text_data, chunk_size=1000, chunk_overlap=100):
 # ==============================================================================
 # STEP 2: VECTOR STORE (Storage & Indexing)
 # ==============================================================================
-# Here we connect to the Qdrant database. We take the text chunks, turn them into
-# numerical vectors (embeddings) using Google's model, and save them.
-# ==============================================================================
 def get_qdrant_vector_store(collection_name="user-data-collection"):
     client = qdrant_client.QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY, timeout=30)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GOOGLE_API_KEY)
-
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=GOOGLE_API_KEY
+    )
+    
     try:
         client.get_collection(collection_name=collection_name)
     except Exception:
@@ -66,7 +88,7 @@ def get_qdrant_vector_store(collection_name="user-data-collection"):
             client.create_collection(
                 collection_name=collection_name,
                 vectors_config=qdrant_client.http.models.VectorParams(
-                    size=768, 
+                    size=3072, 
                     distance=qdrant_client.http.models.Distance.COSINE
                 )
             )
@@ -89,7 +111,6 @@ def upsert_data_to_qdrant(documents, metadatas, collection_name="user-data-colle
         batch_meta = metadatas[i:i+batch_size]
         current_batch = i // batch_size + 1
         
-        # Retry logic for Rate Limits
         for attempt in range(3):
             try:
                 vector_store.add_texts(batch_docs, batch_meta)
@@ -102,7 +123,7 @@ def upsert_data_to_qdrant(documents, metadatas, collection_name="user-data-colle
                     raise e
         
         progress_bar.progress(min(current_batch / total_batches, 1.0))
-        time.sleep(5) # Throttle for Free Tier
+        time.sleep(5) 
     progress_bar.empty()
 
 def get_vector_count(collection_name="user-data-collection"):
@@ -117,10 +138,7 @@ def clean_database(collection_name="user-data-collection"):
     client.delete(collection_name=collection_name, points_selector=qdrant_client.http.models.FilterSelector(filter=qdrant_client.http.models.Filter(must=[])))
 
 # ==============================================================================
-# STEP 3: RETRIEVAL & RERANKING (Finding the Best Context)
-# ==============================================================================
-# First, we find the roughly similar chunks from Qdrant (Retrieval).
-# Then, we use Cohere to re-order them so the MOST relevant one is truly #1 (Reranking).
+# STEP 3: RETRIEVAL & RERANKING
 # ==============================================================================
 def get_retriever(collection_name="user-data-collection", top_k=5):
     vector_store = get_qdrant_vector_store(collection_name)
@@ -138,10 +156,7 @@ def rerank_documents(query, documents, top_n=3):
         return documents[:top_n]
 
 # ==============================================================================
-# STEP 4: GENERATION (The AI Answer)
-# ==============================================================================
-# We feed the User Query + Reranked Context to Geminim, using a smart
-# fallback strategy to ensure we always get an answer despite API limits.
+# STEP 4: GENERATION
 # ==============================================================================
 def generate_answer(query, context):
     prompt_template = """
@@ -160,7 +175,7 @@ def generate_answer(query, context):
     
     for model_name in candidate_models:
         try:
-            model = ChatGoogleGenerativeAI(model=model_name, temperature=0.3, api_key=GOOGLE_API_KEY)
+            model = ChatGoogleGenerativeAI(model=model_name, temperature=0.3, google_api_key=GOOGLE_API_KEY)
             chain = PromptTemplate(template=prompt_template, input_variables=["context", "question"]) | model
             
             # Robust Retry Loop
@@ -193,18 +208,33 @@ st.markdown("---")
 with st.sidebar:
     st.header("Data Ingestion")
     tab1, tab2 = st.tabs(["📁 File Upload", "📝 Text Input"])
-    with tab1: file = st.file_uploader("Upload text", type=["txt"])
-    with tab2: text = st.text_area("Paste text", height=150)
+    
+    with tab1: 
+        # UPDATED: Added "pdf" to type list
+        file = st.file_uploader("Upload document", type=["txt", "pdf"]) 
+    
+    with tab2: 
+        text_input = st.text_area("Paste text", height=150)
     
     if st.button("🚀 Process Data", use_container_width=True):
-        raw_text = file.read().decode("utf-8") if file else text
-        if raw_text.strip():
-            with st.spinner("Processing..."):
+        raw_text = ""
+        
+        # Logic to decide which source to use
+        if file:
+            with st.spinner("Extracting text from file..."):
+                raw_text = extract_text_from_file(file)
+        elif text_input:
+            raw_text = text_input
+
+        if raw_text and raw_text.strip():
+            with st.spinner("Processing chunks & embedding..."):
                 docs, meta = process_and_chunk_data(raw_text)
                 upsert_data_to_qdrant(docs, meta)
-                st.success("Data stored!")
+                st.success("Data stored successfully!")
                 time.sleep(1)
                 st.rerun()
+        else:
+            st.warning("Please provide some text or a valid file.")
                 
     st.divider()
     curr_count = get_vector_count()
@@ -213,9 +243,9 @@ with st.sidebar:
         clean_database()
         st.rerun()
 
-# Chat
+# Chat logic
 if "messages" not in st.session_state: st.session_state.messages = []
-if curr_count == 0: st.info("👋 Upload data to start!")
+if curr_count == 0: st.info("👋 Upload a PDF or Text file to start!")
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).markdown(msg["content"])
@@ -226,7 +256,7 @@ if query := st.chat_input("Ask a question..."):
     st.chat_message("user").markdown(query)
     
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
+        with st.spinner("Searching and generating..."):
             retrieved = get_retriever().invoke(query)
             reranked = rerank_documents(query, retrieved)
             context_str = "\n\n".join([d.page_content for d in reranked])

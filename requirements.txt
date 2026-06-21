@@ -8,3 +8,4 @@ langchain-google-genai
 langchain-community
 langchain-qdrant
 langchain-text-splitters
+pypdf
