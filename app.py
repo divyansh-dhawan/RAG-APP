@@ -21,6 +21,16 @@ st.write(
     importlib.metadata.version("langchain")
 )
 
+load_dotenv()
+try:
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+    COHERE_API_KEY = st.secrets["COHERE_API_KEY"]
+    QDRANT_API_KEY = st.secrets["QDRANT_API_KEY"]
+    QDRANT_URL = st.secrets["QDRANT_URL"]
+except Exception as e:
+    st.error(f"Missing API Keys: {e}")
+    st.stop()
+
 genai.configure(api_key=GOOGLE_API_KEY)
 
 try:
